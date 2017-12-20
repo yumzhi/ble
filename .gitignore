@@ -1,0 +1,16 @@
+# lib files
+/BK3431_designkit_V2.7/core/lib/*.lib
+
+# Object files
+/BK3431_designkit_V2.7/lnk/*
+/BK3431_designkit_V2.7/obj/*
+
+BLE.uvgui.Administrator 
+BLE.uvgui.beken 
+BLE.uvgui.Chang 
+BLE.uvgui_Administrator.bak 
+BLE.uvgui_beken.bak 
+BLE.uvopt 
+BLE.uvproj 
+BLE_uvopt.bak 
+BLE_uvproj.bak
