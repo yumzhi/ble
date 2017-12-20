@@ -1,4 +1,0 @@
--c --cpu ARM966E-S -D__MICROLIB -g -O3 -Otime --apcs=interwork -I.\core\sys\include -I.\hal\prth_chimera\sys\include -I.\core\transport\include -I.\hal\hw\include -I.\core\hw\include -I.\core\lc\include -I.\hal\prth_chimera\hw\include -I.\core\le\include -I.\hal\prth_chimera\hcit\include -I.\core\lc\lslc\include -I.\core\bt\include -I.\core\hc\include -I.\core\tc\include -I.\core\le\include -I.\core\lmp\include -I.\core\sys\include -I.\core\transport\include -I.\hal\hw\radio\BK3431\include
--I D:\Keil_v472\ARM\RV31\INC
--I D:\Keil_v472\ARM\CMSIS\Include
--DPRH_BS_CFG_SELECT_LEVEL="3" -DRADIO_TYPE="BK3431" -DBUILD_TYPE="FLASH_BUILD" -DCHIMERA -D__BYTE_ORDER="__LITTLE_ENDIAN" -DHW_DATA32 -DHAB_BASE_ADDR="0x0308000" -DJAL_BASE_ADDR="0x0801600" -D__USE_INLINES__ -D_NO_FIX_CHANNEL_TEST_ -D_NO_VIRTUAL_HOST_ -D_NOSEND_TO_HOST -o .\obj\tra_uart.o --omf_browse .\obj\tra_uart.crf --depend .\obj\tra_uart.d --feedback ".\obj\BLE.fed" "core\transport\tra_uart.c"
