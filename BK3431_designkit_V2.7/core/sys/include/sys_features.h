@@ -449,4 +449,7 @@
 //#define AUX_CALIBRATE /* Enable no packet receive rate 5/932 = 0.5 %,Disable 35/887 = 3.9 % */
 //#define JAL_BASE_ADDR 0x0F26000 
 
+#define STORE_BTADDR_FLASH   1 //Kevin Add @ 20171220
+#define ADD_CHANGE_BTNAME      //Kevin Add @ 20171220
+
 #endif

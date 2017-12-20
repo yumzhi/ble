@@ -10,6 +10,8 @@
 #include "sys_types.h"
 #include "sys_hal_config.h"
 
+#define PWMLIGHT //Kevin Add @ 20171220
+
 #ifndef TRUE
 #define TRUE  1
 #endif

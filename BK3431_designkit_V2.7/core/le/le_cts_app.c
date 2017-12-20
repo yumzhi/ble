@@ -501,8 +501,8 @@ const u_int8 SerialPort_App_Adv_Ind[] = {
     GAP_ADTYPE_FLAGS_GENERAL | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
     0x03, 0x02, 0xE0, 0xFF};
 
-const u_int8 SerialPort_App_Scan_Resp[] = {
-		 //u_int8 SerialPort_App_Scan_Resp[] = {
+//const u_int8 SerialPort_App_Scan_Resp[] = {
+u_int8 SerialPort_App_Scan_Resp[] = {
     0x0E,
     GAP_ADTYPE_LOCAL_NAME_COMPLETE,
     'B','l','e','S','e','r','i','a','l','P','o','r','t'};
@@ -546,6 +546,7 @@ void Restart_Battery_Detect_Timer(void)//for battery detect function
 }
 void LE_APP_Init(void)
 {
+	u_int8 i; //Kevin Add @ 20171220
     // Initially for fully embedded Proximity, IAS and Find Me
     App_Config_App_Present = 1;
     LEapp_Config.TAPP_BatteryDetect_Timer = BT_CLOCK_MAX_TIMEOUT;//for find me
@@ -612,7 +613,7 @@ void LE_APP_Init(void)
 					);      
 	
 #ifdef ADD_CHANGE_BTNAME
-    driver_mfc_read_buf(NVR_SPACE, 0, g_sys_vars->bt_name, 16);
+    //driver_mfc_read_buf(NVR_SPACE, 0, g_sys_vars->bt_name, 16); //Kevin Remove @ 20171220
 
     for(i = 0; i < 16; i++)
     {

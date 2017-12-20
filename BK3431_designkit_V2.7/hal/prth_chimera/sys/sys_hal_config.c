@@ -31,11 +31,15 @@
 #include <string.h>
 #include "sys_config.h"
 #include "sys_hal_features.h"
+#include "BKAPI.h" //Kevin Add @ 20171220
 extern t_SYS_Config g_sys_config;
 
 #define TEN_MICRO_SECONDS (0x30d40)
 void EEPROM_Wait_For(u_int32 len);
-
+//Kevin Add@ 20171218
+#ifdef PWMLIGHT
+	u_int8 devNameStr[16] = "M_light";
+#endif
 /*****************************************************************************
  * SYShal_config_Initialise
  *
@@ -77,30 +81,107 @@ void SYShal_config_Initialise(void)
                              (g_sys_config.local_device_address.bytes[1] << 16);
 
 #else
-    /* //u_int8 bd_addr[8] = {0x00, 0xff, 0x00, 0x22, 0x2d, 0xae}; */
-    //　/*Uu_intt8 bd_addr_bak[8] = {0x33, 0xff, 0x00, 0x22, 0x2d, 0xae};/* Com4 */
-    //u_int8 bd_addr_bak[8] = {0x66, 0xff, 0x00, 0x22, 0x2d, 0xae};
-    /* //u_int8 bd_addr[8] = {0x09, 0xff, 0x00, 0x22, 0x2d, 0xae};/\* Com9 *\/ */
-    u_int8 i = 0;
-	
-    FlashStorageInit();
- 	
-	for(i=0; i<6; i++)
-    {
-        g_sys_config.local_device_address.bytes[i] = g_sys_vars->bt_addr.bytes[i];//bd_addr_bak[i];
-        //memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
-    }
-/*#ifdef FIX_ROM_ADDRESS
-		memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
-#else
+	#if (STORE_BTADDR_FLASH == 1)
+		/* //u_int8 bd_addr[8] = {0x00, 0xff, 0x00, 0x22, 0x2d, 0xae}; */
+		//　/*Uu_intt8 bd_addr_bak[8] = {0x33, 0xff, 0x00, 0x22, 0x2d, 0xae};/* Com4 */
+		//u_int8 bd_addr_bak[8] = {0x66, 0xff, 0x00, 0x22, 0x2d, 0xae};
+		/* //u_int8 bd_addr[8] = {0x09, 0xff, 0x00, 0x22, 0x2d, 0xae};/\* Com9 *\/ */
+		u_int8 i = 0;
+		u_int8 macAddr[6];
+		u_int32 macAddrOrg = 0;    	  //设备编号起始mac地址对应的数值
+		u_int32 devNameSuffix = 0;    //设备名称后缀编号
+		u_int32 devNameSuffixOrg = 0; //设备名称后缀起始编号
+		FlashStorageInit();
+		
+		for(i=0; i<6; i++)
+		{
+			g_sys_config.local_device_address.bytes[i] = g_sys_vars->bt_addr.bytes[i];//bd_addr_bak[i];
+			//memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
+			macAddr[i] = g_sys_vars->bt_addr.bytes[i]; //Kevin Add @ 20171220
+		}
+		#ifdef PWMLIGHT
+			//将当前mac地址的后四个字节转化为对应数值
+			devNameSuffix = (macAddr[3]<<24) | (macAddr[2]<<16) | (macAddr[1]<<8) | macAddr[0]; 
+			devNameSuffix = devNameSuffix - macAddrOrg + devNameSuffixOrg; //得到当前设备对应的名称后缀编号
+			#if 1 //Method one
+				for(i = 0; i < 16; i++)
+				{
+					if((devNameStr[i] == 0) && (i < 16))
+					{
+						devNameStr[i++] = (devNameSuffix/10000)%10 + 0x30;
+						devNameStr[i++] = (devNameSuffix/1000)%10 + 0x30;
+						devNameStr[i++] = (devNameSuffix/100)%10 + 0x30;
+						devNameStr[i++] = (devNameSuffix/10)%10 + 0x30;
+						devNameStr[i++] = (devNameSuffix)%10 + 0x30;
+						devNameStr[i] = '\0';
+						break;
+					}
+				}
+			#else //Method two
+				devNameSuffix = devNameSuffix % 100000;
+				for(i = 0; i < 16; i++)
+				{
+					if((devNameStr[i] == 0) && (i < 16))
+					{
+						if(devNameSuffix < 10)
+						{
+							devNameStr[i++] = (devNameSuffix)%10 + 0x30;
+							devNameStr[i] = 0;
+							break;
+						}
+						else if(devNameSuffix < 100)
+						{
+							devNameStr[i++] = ((devNameSuffix / 10) % 10) + 0x30;
+							devNameStr[i++] = (devNameSuffix % 10) + 0x30;
+							devNameStr[i] = 0;
+							break;
+						}
+						else if(devNameSuffix < 1000)
+						{
+							devNameStr[i++] = ((devNameSuffix / 100) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 10) % 10) + 0x30;
+							devNameStr[i++] = (devNameSuffix)%10 + 0x30;
+							devNameStr[i] = 0;
+							break;
+						}
+						else if(devNameSuffix < 10000)
+						{
+							devNameStr[i++] = ((devNameSuffix / 1000) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 100) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 10) % 10) + 0x30;
+							devNameStr[i++] = (devNameSuffix)%10 + 0x30;
+							devNameStr[i] = 0;
+							break;
+						}
+						else
+						{
+							devNameStr[i++] = ((devNameSuffix / 10000) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 1000) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 100) % 10) + 0x30;
+							devNameStr[i++] = ((devNameSuffix / 10) % 10) + 0x30;
+							devNameStr[i++] = (devNameSuffix)%10 + 0x30;
+							devNameStr[i] = 0;
+							break;
+						}
+					}
+				}
+			#endif
+			memcpy(g_sys_vars->bt_name, devNameStr, 16);
+		#endif
+		
+	#else
+		/*#ifdef FIX_ROM_ADDRESS
+				memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
+		#else
 
-    u_int32 bd_addr[2];
-    read_nvr(0, bd_addr, 2);
-    if ((bd_addr[0] == 0xffffffff) && (bd_addr[1] == 0xffffffff))
-        memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
-    else
-        memcpy(g_sys_config.local_device_address.bytes, bd_addr, BDADDR_LENGTH);
-#endif*/
+			u_int32 bd_addr[2];
+			read_nvr(0, bd_addr, 2);
+			if ((bd_addr[0] == 0xffffffff) && (bd_addr[1] == 0xffffffff))
+				memcpy(g_sys_config.local_device_address.bytes, bd_addr_bak, BDADDR_LENGTH);
+			else
+				memcpy(g_sys_config.local_device_address.bytes, bd_addr, BDADDR_LENGTH);
+		#endif*/
+	#endif
 #endif
 }
 
